@@ -2,7 +2,7 @@ import _ from 'lodash';
 import Head from 'next/head'
 import Image from 'next/image'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 import { Inter } from '@next/font/google'
 import styles from '@/styles/Home.module.css'
@@ -15,30 +15,21 @@ import { Container, Grid, Card, Text } from '@nextui-org/react';
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
-    const [todos, setTodos] = useState([
-        {
-            title: 'Testing1'
-            , content: 'Testing1 Content'
-            , id: 1
-        }
-        , {
-            title: 'Testing2'
-            , content: 'Testing2 Content'
-            , id: 2
-        }
-        , {
-            title: 'Testing3'
-            , content: 'Testing3 Content'
-            , id: 3
-        }
-        , {
-            title: 'Testing4'
-            , content: 'Testing4 Content'
-            , id: 4
-        }
-    ]);
+    const [todos, setTodos] = useState([]);
     const newTodoTitleRef =  useRef(null);
     const newTodoContentRef =  useRef(null);
+    
+    useEffect(() => {
+        const getTodo = async () => {
+            const response = await fetch("/api/todoList", {
+                method: "GET",
+            });
+            return response.json();
+        }
+        getTodo().then((data) => {
+            setTodos(data.todoList);
+        });
+    }, []);
 
     const renderedTodos = (todos_input) => {
         return _.map(todos_input, (todo) => {
