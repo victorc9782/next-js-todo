@@ -18,22 +18,29 @@ export default function Home() {
     const [todos, setTodos] = useState([]);
     const newTodoTitleRef =  useRef(null);
     const newTodoContentRef =  useRef(null);
-    
-    useEffect(() => {
-        const getTodo = async () => {
-            const response = await fetch("/api/todoList", {
-                method: "GET",
-            });
-            return response.json();
-        }
-        getTodo().then((data) => {
+
+    const getTodoRequest = async () => {
+        const response = await fetch("/api/todoList", {
+            method: "GET",
+        });
+        return response.json();
+    }
+
+    const updateTodo = async () => {
+        getTodoRequest().then((data) => {
+            console.log(data);
+            
             setTodos(data.todoList);
         });
+    }
+    
+    useEffect(() => {
+        updateTodo()
     }, []);
 
     const renderedTodos = (todos_input) => {
         return _.map(todos_input, (todo) => {
-            return <Grid xs={12} sm={4} key={todo.id}>
+            return <Grid xs={12} sm={4} key={todo._id}>
                     <Card>
                         <Card.Header>
                             <Text b>{todo.title}</Text>
@@ -46,13 +53,34 @@ export default function Home() {
         })
     }
 
-    const onClickAddTodoButton = () => {
-        const newTodoItem = {
+    const postTodo = async (newTodo) => {
+        const response = await fetch("/api/todoList", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                title: newTodo.title,
+                content: newTodo.content,
+            })
+        });
+
+        updateTodo();
+        return response;
+    }
+
+    const onClickAddTodoButton = async () => {
+        // const newTodoItem = {
+        //     title: newTodoTitleRef.current.value
+        //     , content: newTodoContentRef.current.value
+        //     , id: todos.length
+        // }
+        // setTodos([...todos, newTodoItem])
+        const response = await postTodo({
             title: newTodoTitleRef.current.value
             , content: newTodoContentRef.current.value
-            , id: todos.length
-        }
-        setTodos([...todos, newTodoItem])
+        })
+        console.log(response)
     };
 
     return (
